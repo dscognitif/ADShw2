@@ -21,6 +21,7 @@
 #include <stdlib.h> /* NULL */
 #include "scanner.h"
 #include "recognizeEq.h"
+#include <math.h>
 
 /* The functions acceptNumber, acceptIdentifier and acceptCharacter have as
  * (first) argument a pointer to an token list; moreover acceptCharacter has as
@@ -66,35 +67,42 @@ int acceptCharacter(List *lp, char c) {
  * the token list. Otherwise they yield 0 and the pointer remains unchanged.
  */
 
-int returnValue (List *lp) {
-  return *lp;
-} 
 
+double biggestExponent = 0;
 
-int biggestExponent = 0;
+// read the value of the number and determine whether it is biggest exponent
+int valueNumber(List *lp, double *wp) {
+  if (*lp != NULL && (*lp)->tt == Number) {
+    *wp = ((*lp)->t).number;
+    *lp = (*lp)->next;
+    if (*wp > biggestExponent) {
+      biggestExponent = *wp;
+    }
+    return 1;
+  }
+  return 0;
+}
 
 // accepts exponent '^' character and a number succeeding it
 int acceptExponent(List *lp) {
+  double wp = 0;
   if (acceptCharacter(lp, '^')) {
-    return acceptNumber(lp);
-    if (returnValue(lp) > biggestExponent) {
-        biggestExponent = returnValue(lp);
-    }
+    return valueNumber(lp, &wp);
+  } else {
+    return 1;
   }
   return 0;
 }
 
 int acceptTerm(List *lp) {
-  if (acceptNumber(lp)) {
+  if (acceptNumber(lp) || (acceptCharacter(lp, '-') && acceptNumber(lp))) {
     if (acceptIdentifier(lp)) {
       return acceptExponent(lp);
-      
     }
     return 1;
   } else {
     if (acceptIdentifier(lp)) {
       return acceptExponent(lp);
-      
     }
     return 0;
   }
@@ -111,10 +119,8 @@ int acceptExpression(List *lp) {
       return 0;
     }
     
-  
   } /* no + or -, so we reached the end of the expression */
   return 1;
-  
 }
 
 // accepts equations of the the form <expression> = <expression>
@@ -122,15 +128,26 @@ int acceptEquation(List *lp) {
   if (!acceptExpression(lp)) {
     return 0;
   }
+
+
   if (acceptCharacter(lp, '=')) {
     if (!acceptExpression(lp)) {
       return 0;
     }
-  
   }
   return 1;
-  
+}
 
+int countVar = 0;
+
+// loop through list to determine whether there are 1 or more variables
+void visitList(List *lp) {
+  while (*lp != NULL) {
+    if ((*lp)->tt == Identifier) {
+      countVar++;
+    }
+    *lp = (*lp)->next;
+  }
 }
 
 /* The function recognizeExpressions demonstrates the recognizer. */
@@ -145,8 +162,8 @@ void recognizeExpressions() {
     printList(tl);
     tl1 = tl;
     if (acceptEquation(&tl1) && tl1 == NULL) {
-      printf("this is an equation in 1 variable");
-      printf("%s %d %s", " of", biggestExponent, "degrees");
+        printf("this is an equation in 1 variable");
+        printf("%s %s %f", " of", "degree", biggestExponent);
     } else {
       printf("this is not an equation\n");
     }
