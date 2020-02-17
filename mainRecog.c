@@ -6,6 +6,6 @@
 #include "recognizeEq.h"
 
 int main(int argc, char *argv[]) {
-  recognizeExpressions();
+  recognizeEquations();
   return 0;
 }
