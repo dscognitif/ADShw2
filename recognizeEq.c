@@ -64,7 +64,7 @@ int acceptCharacter(List *lp, char c) {
  */
 
 // stores the biggest exponent
-int biggestExponent = 0;
+int biggestExponent = - 1;
 
 // reads the value of the number and determine whether it is biggest exponent
 int valueNumber(List *lp, double *wp) {
@@ -93,6 +93,7 @@ int acceptExponent(List *lp) {
       return valueNumber(lp, &wp);
     }
   } else {
+    biggestExponent = 1;
     return 1;
   }
   return 0;
@@ -187,17 +188,10 @@ void recognizeEquations() {
     if (acceptEquation(&tl1) && tl1 == NULL) {
       // conditional if there is one variable
       if (determineVariables(tl) == 1) {
-      printf("this is an equation in 1 variable");
-    
-        // if the exponent is 1 or 0
-        if (biggestExponent == 0) {
-          printf(" of degree 1");
-        }
-        else {
+          printf("this is an equation in 1 variable");
           printf("%s %s %d\n", " of", "degree", biggestExponent);
-        }
         // resets the biggestExponent
-        biggestExponent = 0;
+        biggestExponent = -1;
       }
       // conditional if there are more than 1 variable
       else if (determineVariables(tl) != 1) {
